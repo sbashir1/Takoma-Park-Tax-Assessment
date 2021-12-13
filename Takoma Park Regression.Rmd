@@ -1,0 +1,400 @@
+---
+title: "Takoma Park Regression"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Read in the merged file
+```{r}
+# Load readr package and read in data file
+library(readr)
+merged <- read_csv("/Users/saamia/Downloads/appeals_tracts_census_merge-FINAL.csv")
+```
+
+View the merged file
+```{r}
+# View the previously loaded file
+View(merged)
+```
+
+Make variables accessible to R
+```{r}
+# Make the columns of the loaded file accessible in the R workspace
+attach(merged)
+```
+
+Remove unwanted columns
+```{r}
+# Remove the first several columns
+merged<-merged[,-c(1, 2, 3, 4, 5, 9, 12, 13, 14)]
+merged
+```
+
+Remove the columns pertaining to margin of error.
+```{r}
+# Remove all columns involving the margin of error
+merged<-merged[,-c(133:260)]
+merged
+```
+
+Create two dataframes: 1 has the value.change variable but not the pct_change variable; the other has the pct_change variable but not the value.change variables
+```{r}
+# Create two dataframes, one with value.change but no pct_change, and one with pct_change but no value.chage 
+merged_val<-merged[,-c(5)]
+merged_pct<-merged[,-c(3)]
+```
+
+Create linear regression model with all variables and value.change as response
+```{r}
+# Note this results in an r-squared of 1 (there's multicollinearity most likely)
+m_val<-lm(data=merged_val, value.change~.)
+summary(m_val)
+```
+
+Create linear regression model removing 'appealed.value', 'final.value', and those variables that have an NA from the previous model, same response variable 
+```{r}
+# Linear regressio model with NA variables removed
+m2_val<-lm(data=merged_val,       
+       value.change~num_appeals+ALUBE001+ALUCE002+ALUCE003+ALUCE004+ALUCE005+ALUCE006+
+       ALUCE007+ALUCE009+ALUKE002+ALUKE003+ALUKE004+ALUKE005+ALUKE006+ALUKE007+ALUKE008+
+       ALUKE010+ALU9E001+ALU9E002+ALU9E003+ALU9E005+ALU9E008+ALVZE003+ALVZE005+ALVZE006+   
+       ALVZE008+ALVZE009+ALVZE010+ALVZE011+ALVZE015+ALVZE016+ALWVE001+ALWVE002+ALWVE003+   
+       ALWVE004+ALWVE005+ALWVE006+ALWVE007+ALW0E002+ALW0E003+ALW0E004+ALW0E005+ALW0E006+
+       ALW0E007+ALW0E008+ALW0E009+ALW0E010+ALW0E011+ALW0E012+ALW0E013+ALW0E014+ALW0E015+   
+       ALW0E016+ALW1E001+ALX5E001+ALZJE001+ALZWE002+ALZWE003+ALZWE004+ALZWE005+ALZWE006+
+       ALZWE007+ALZWE009+ALZ0E001+ALZ0E002+ALZ0E003+AL1FE001+AL1FE002+AL1FE003+AL1FE004+   
+       AL1FE005+AL1FE006+AL1FE007+AL1FE008+AL1FE009+AL1FE010+AL1FE011+AL1FE012+AL1FE013+   
+       AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+AL1FE019+AL1FE020+AL1FE021+AL1FE022+   
+       AL1FE023+AL1FE024+AL1FE025+AL1FE026+AL1HE001)
+summary(m2_val)
+```
+
+Create linear regression model only containing significant predictors, still value.change as response
+```{r}
+# Linear regression only containing significant predictors
+m3_val<-lm(data=merged_val, value.change~num_appeals+ALUBE001+ALUCE002+ALUCE007+
+         ALUKE010+ALU9E008+ALVZE003+ALVZE016+ALWVE002+ALWVE003+ALW0E007+ALW0E010+ALW0E011+
+         ALW0E013+ALW0E014+ALW1E001+ALZWE002+ALZWE003+ALZWE005+ALZWE009+ALZ0E001+ALZ0E003+
+         AL1FE001+AL1FE002+AL1FE003+AL1FE004+AL1FE005+AL1FE006+AL1FE007+AL1FE008+AL1FE009+
+         AL1FE010+AL1FE011+AL1FE012+AL1FE013+AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+
+         AL1FE019+AL1FE020+AL1FE021+AL1FE022+AL1FE023+AL1FE024+AL1FE025+AL1FE026+AL1HE001)
+summary(m3_val)
+```
+
+Removing insignificant predictors again, still value.change as response
+```{r}
+# Linear regression keeping only the significant predictors from the previous model
+m4_val<-lm(data=merged_val, value.change~num_appeals+
+         ALUKE010+ALU9E008+ALVZE003+ALW0E007+ALW0E010+ALW0E013+ALW0E014+ALW1E001+
+         ALZWE002+ALZWE003+ALZWE009+ALZ0E003+AL1FE001+AL1FE002+AL1FE003+AL1FE004+AL1FE005+
+         AL1FE006+AL1FE007+AL1FE008+AL1FE009+AL1FE010+AL1FE011+AL1FE012+AL1FE013+AL1FE014+
+         AL1FE015+AL1FE016+AL1FE017+AL1FE018+AL1FE019+AL1FE020+AL1FE021+AL1FE022+AL1FE023+
+         AL1FE024+AL1FE025+AL1FE026+AL1HE001)
+summary(m4_val)
+```
+
+Removing insignificant predictors one last time 
+```{r}
+# Linear regression model with only significant predictors from previous model
+m5_val<-lm(data=merged_val, value.change~num_appeals+ALUKE010+ALU9E008+ALVZE003+      
+         ALW0E007+ALW0E010+ALW0E013+ALW0E014+ALZWE002+ALZWE003+ALZWE009+ALZ0E003+AL1FE001+
+         AL1FE002+AL1FE003+AL1FE004+AL1FE005+AL1FE006+AL1FE007+AL1FE008+AL1FE009+AL1FE010+
+         AL1FE011+AL1FE012+AL1FE013+AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+AL1FE019+
+         AL1FE020+AL1FE021+AL1FE022+AL1FE023+AL1FE024+AL1FE025+AL1FE026+AL1HE001)
+summary(m5_val)
+```
+
+This last regression model is the best one since it has the highest adjusted r-squared value of 0.07109 and all predictors in the model are significant. 
+
+
+
+
+
+Creating linear regression model using all variables as predictors and with pct_change as the response variable
+```{r}
+# Linear regression with all predictors and pct_change as response variable
+m_pct<-lm(data=merged_pct, pct_change~.)
+summary(m_pct)
+```
+
+Removing the variables with NA results as well as appealed.value and final.value
+```{r}
+# Linear regression excluding variables with NA, appealed.value, and final.value
+m2_pct<-lm(data=merged_pct, 
+       pct_change~num_appeals+ALUBE001+ALUCE002+ALUCE003+ALUCE004+ALUCE005+ALUCE006+
+       ALUCE007+ALUCE009+ALUKE002+ALUKE003+ALUKE004+ALUKE005+ALUKE006+ALUKE007+ALUKE008+
+       ALUKE010+ALU9E001+ALU9E002+ALU9E003+ALU9E005+ALU9E008+ALVZE003+ALVZE005+ALVZE006+   
+       ALVZE008+ALVZE009+ALVZE010+ALVZE011+ALVZE015+ALVZE016+ALWVE001+ALWVE002+ALWVE003+   
+       ALWVE004+ALWVE005+ALWVE006+ALWVE007+ALW0E002+ALW0E003+ALW0E004+ALW0E005+ALW0E006+
+       ALW0E007+ALW0E008+ALW0E009+ALW0E010+ALW0E011+ALW0E012+ALW0E013+ALW0E014+ALW0E015+   
+       ALW0E016+ALW1E001+ALX5E001+ALZJE001+ALZWE002+ALZWE003+ALZWE004+ALZWE005+ALZWE006+
+       ALZWE007+ALZWE009+ALZ0E001+ALZ0E002+ALZ0E003+AL1FE001+AL1FE002+AL1FE003+AL1FE004+   
+       AL1FE005+AL1FE006+AL1FE007+AL1FE008+AL1FE009+AL1FE010+AL1FE011+AL1FE012+AL1FE013+   
+       AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+AL1FE019+AL1FE020+AL1FE021+AL1FE022+   
+       AL1FE023+AL1FE024+AL1FE025+AL1FE026+AL1HE001)
+summary(m2_pct)
+```
+
+After seeing the adjusted r-squared value resulting from the models where pct_change is the response variable, further regression models weren't made since the adjusted r-squared value is much lower than those models that had value.change as the response variable. 
+
+
+
+
+See if there are any violations of assumptions by viewing the diagnostic plots
+```{r}
+# There are some violations of homoscedasticity and normality
+par(mfrow=c(2,2))
+plot(m5_val)
+```
+
+Transforming the response variable can be one way to fix the violations.
+
+
+
+
+
+In order to perform transformations on the response variable, rows with a 0 need to be dropped since log(0) is undefined. 
+```{r}
+# View how many rows are in the dataset and how many rows don't have 0
+nrow(merged_val)
+sum(merged_val$value.change!=0)
+```
+
+Only keep the rows that don't have a 0 in the value.change column
+```{r}
+merged_val2<-subset(merged_val, value.change!=0)
+```
+
+
+Fit a linear regression on the log of value.change 
+```{r}
+# Linear regression with transformation of the response variable and exluding NA variables, appealed.value, and final.value
+trans_m2_val<-lm(data=merged_val2, 
+       log(value.change)~ALUCE001+ALUCE002+ALUCE003+ALUCE004+ALUCE005+ALUCE006+
+       ALUCE007+ALUCE009+ALUKE002+ALUKE003+ALUKE004+ALUKE005+ALUKE006+ALUKE007+ALUKE008+
+       ALUKE010+ALU9E001+ALU9E002+ALU9E003+ALU9E005+ALU9E008+ALVZE003+ALVZE005+ALVZE006+   
+       ALVZE008+ALVZE009+ALVZE010+ALVZE011+ALVZE015+ALVZE016+ALWVE001+ALWVE002+ALWVE003+   
+       ALWVE004+ALWVE005+ALWVE006+ALWVE007+ALW0E002+ALW0E003+ALW0E004+ALW0E005+ALW0E006+
+       ALW0E007+ALW0E008+ALW0E009+ALW0E010+ALW0E011+ALW0E012+ALW0E013+ALW0E014+ALW0E015+   
+       ALW0E016+ALW1E001+ALX5E001+ALZJE001+ALZWE002+ALZWE003+ALZWE004+ALZWE005+ALZWE006+
+       ALZWE007+ALZWE009+ALZ0E001+ALZ0E002+ALZ0E003+AL1FE001+AL1FE002+AL1FE003+AL1FE004+   
+       AL1FE005+AL1FE006+AL1FE007+AL1FE008+AL1FE009+AL1FE010+AL1FE011+AL1FE012+AL1FE013+   
+       AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+AL1FE019+AL1FE020+AL1FE021+AL1FE022+   
+       AL1FE023+AL1FE024+AL1FE025+AL1FE026+AL1HE001)
+summary(trans_m2_val)
+```
+
+Only keeping the predictors that are significant
+```{r}
+# Linear regression comprising of those variables that are significant
+trans_m3_val<-lm(data=merged_val2, 
+              log(value.change)~ALVZE006+ALVZE010+ALVZE011+ALWVE002+ALWVE003+ALWVE004+
+              ALW0E002+ALW0E003+ALW0E004+ALW0E007+ALW0E012+ALW0E015+ALX5E001+ALZJE001+
+              ALZWE002+ALZWE003+ALZWE004+ALZWE009+AL1FE004+AL1FE007+AL1FE009+AL1FE010+
+              AL1FE015+AL1FE016+AL1FE023+AL1HE001)
+summary(trans_m3_val)
+```
+
+Keep the predictors that are significant one last time
+```{r}
+# Linear regression model only keeping the predictors that are significant from the previous model 
+trans_m4_val<-lm(data=merged_val2, 
+              log(value.change)~ALVZE006+ALVZE010+ALVZE011+ALWVE002+ALWVE003+ALWVE004+
+              ALW0E003+ALW0E004+ALW0E007+ALW0E012+ALW0E015+ALX5E001+ALZJE001+ALZWE003+
+              ALZWE009+AL1FE004+AL1FE007+AL1FE010+AL1FE015+AL1FE016+AL1HE001)
+summary(trans_m4_val)
+```
+
+The best model is the one above, trans_m4_val, since all predictors in the model are significant and the adjusted r-squared value is the second highest out of all the other models. Trans_m3_val has a slightly higher adjusted r-squared value of 0.182 but contains predictors that aren't significant. For this reason, model trans_m4_val would be the better model even though its adjusted r-squared value is slightly lower.  
+
+
+
+
+
+
+Only keep those rows that aren't 0 in the pct_change column
+```{r}
+# Remove rows where pct_change is 0
+merged_pct2<-subset(merged_pct, pct_change!=0)
+```
+
+Linear regression on the log of pct_change, excluding NA variables, appealed.value, and final.value
+```{r}
+# Linear regression on the log of pct_change
+trans_m2_pct<-lm(data=merged_pct2, 
+              log(pct_change)~ALUCE001+ALUCE002+ALUCE003+ALUCE004+ALUCE005+ALUCE006+
+              ALUCE007+ALUCE009+ALUKE002+ALUKE003+ALUKE004+ALUKE005+ALUKE006+ALUKE007+
+              ALUKE008+ALUKE010+ALU9E001+ALU9E002+ALU9E003+ALU9E005+ALU9E008+ALVZE003+
+              ALVZE005+ALVZE006+ALVZE008+ALVZE009+ALVZE010+ALVZE011+ALVZE015+ALVZE016+
+              ALWVE001+ALWVE002+ALWVE003+ALWVE004+ALWVE005+ALWVE006+ALWVE007+ALW0E002+
+              ALW0E003+ALW0E004+ALW0E005+ALW0E006+ALW0E007+ALW0E008+ALW0E009+ALW0E010+
+              ALW0E011+ALW0E012+ALW0E013+ALW0E014+ALW0E015+ALW0E016+ALW1E001+ALX5E001+
+              ALZJE001+ALZWE002+ALZWE003+ALZWE004+ALZWE005+ALZWE006+ALZWE007+ALZWE009+
+              ALZ0E001+ALZ0E002+ALZ0E003+AL1FE001+AL1FE002+AL1FE003+AL1FE004+AL1FE005+
+              AL1FE006+AL1FE007+AL1FE008+AL1FE009+AL1FE010+AL1FE011+AL1FE012+AL1FE013+    
+              AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+AL1FE019+AL1FE020+AL1FE021+
+              AL1FE022+AL1FE023+AL1FE024+AL1FE025+AL1FE026+AL1HE001)
+summary(trans_m2_pct)
+```
+
+Linear regression containing only those variables that are significant
+```{r}
+# Linear regressio exluding insignificant predictors from previous model
+trans_m3_pct<-lm(data=merged_pct2, 
+              log(pct_change)~ALUCE004+ALUCE005+ALUCE006+ALUCE009+ALUKE006+ALU9E002+
+              ALU9E003+ALVZE006+ALVZE010+ALVZE011+ALVZE015+ALVZE016+ALWVE002+ALWVE003+     
+              ALWVE004+ALWVE005+ALW0E002+ALW0E004+ALW0E007+ALW0E008+ALW0E009+ALW0E010+
+              ALW0E011+ALW0E012+ALW0E013+ALW0E014+ALW0E015+ALW0E016+ALW1E001+ALX5E001+
+              ALZJE001+ALZWE002+ALZWE003+ALZWE004+ALZWE005+ALZWE006+ALZWE007+ALZWE009+
+              AL1FE001+AL1FE002+AL1FE008+AL1FE010+AL1FE014+AL1FE015+AL1FE016+AL1FE017+
+              AL1FE018+AL1FE019+AL1FE020+AL1FE021+AL1FE022+AL1FE023+AL1FE024+AL1FE025+
+              AL1HE001)
+summary(trans_m3_pct)
+```
+
+Only keep predictors that are significant one last time
+```{r}
+# Linear regression only including significant predictors from previous model
+trans_m4_pct<-lm(data=merged_pct2, log(pct_change)~ALUCE004+ALUCE005+ALUCE009+ALUKE006+
+              ALU9E002+ALU9E003+ALVZE006+ALVZE010+ALVZE011+ALVZE015+ALVZE016+ALWVE002+
+              ALWVE003+ALWVE004+ALWVE005+ALW0E002+ALW0E004+ALW0E009+ALW0E012+ALW0E013+
+              ALW0E014+ALW0E015+ALW1E001+ALX5E001+ALZJE001+ALZWE003+ALZWE004+ALZWE005+
+              ALZWE009+AL1FE001+AL1FE002+AL1FE008+AL1FE010+AL1FE014+AL1FE015+AL1FE016+
+              AL1FE017+AL1FE018+AL1FE019+AL1FE020+AL1FE021+AL1FE022+AL1FE023+AL1FE024+
+              AL1FE025+AL1HE001)
+summary(trans_m4_pct)
+```
+
+ 
+After seeing the adjusted r-squared value for the best model in which pct_change is the response variable, it seems that having the log of value.change be the response variable is better. The adjusted r-squared value for the log of value.change as the response variable is higher than that of the log of pct_change as the response variable. Thus, the linear regression model in which the log of value.change is the response variable and all predictors in the model are significant should be used. 
+
+
+
+
+
+
+
+
+
+
+Create logistic regression model to see if someone will face a decrease in home value or not
+
+Create copy of merged data
+```{r}
+# Copy merged data in which value.change is in the dataset, not pct_change
+log_merged<-merged_val
+```
+
+Change value.change values to 0 if value is less than or equal to 0, 1 otherwise
+```{r}
+# Code value.change into 0 if it is less than or equal to 0, and 1 if it's greater than 0
+log_val_change<-ifelse(log_merged$value.change<=0, 0, 1)
+log_merged$value.change<-log_val_change
+```
+
+Fit logistic regression model on all predictors, excluding those that result in NA, and value.change is the response variable
+```{r}
+# Logistic regression containing all variables that don't result in NA
+log_m<-glm(data=log_merged,       
+       value.change~ALUCE001+ALUCE002+ALUCE003+ALUCE004+ALUCE005+ALUCE006+
+       ALUCE007+ALUCE009+ALUKE002+ALUKE003+ALUKE004+ALUKE005+ALUKE006+ALUKE007+ALUKE008+
+       ALUKE010+ALU9E001+ALU9E002+ALU9E003+ALU9E005+ALU9E008+ALVZE003+ALVZE005+ALVZE006+   
+       ALVZE008+ALVZE009+ALVZE010+ALVZE011+ALVZE015+ALVZE016+ALWVE001+ALWVE002+ALWVE003+   
+       ALWVE004+ALWVE005+ALWVE006+ALWVE007+ALW0E002+ALW0E003+ALW0E004+ALW0E005+ALW0E006+
+       ALW0E007+ALW0E008+ALW0E009+ALW0E010+ALW0E011+ALW0E012+ALW0E013+ALW0E014+ALW0E015+   
+       ALW0E016+ALW1E001+ALX5E001+ALZJE001+ALZWE002+ALZWE003+ALZWE004+ALZWE005+ALZWE006+
+       ALZWE007+ALZWE009+ALZ0E001+ALZ0E002+ALZ0E003+AL1FE001+AL1FE002+AL1FE003+AL1FE004+   
+       AL1FE005+AL1FE006+AL1FE007+AL1FE008+AL1FE009+AL1FE010+AL1FE011+AL1FE012+AL1FE013+   
+       AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+AL1FE019+AL1FE020+AL1FE021+AL1FE022+   
+       AL1FE023+AL1FE024+AL1FE025+AL1FE026+AL1HE001, family=binomial())
+summary(log_m)
+```
+
+Fit logistic regression model using variables that are significant, value.change still response variable
+```{r}
+# Logistic regression fitting only significant variables from previous model
+log_m2<-glm(data=log_merged, 
+        value.change~ALVZE003+ALWVE003+ALWVE007+ALW0E003+ALW0E006+ALW0E010+ALW0E011+
+        ALW0E012+ALW0E013+ALX5E001+ALZ0E001+ALZ0E002+ALZ0E003+AL1FE002+AL1FE005+AL1FE008+
+        AL1FE010+AL1HE001, family=binomial())
+summary(log_m2)
+```
+
+Fit logistic regression model on only the predictors that are significant again
+```{r}
+# Logistic regression only keeping significant predictors from previous model
+log_m3<-glm(data=log_merged, 
+        value.change~ALVZE003+ALWVE003+ALWVE007+ALW0E006+ALW0E010+ALW0E011+ALW0E013+
+        ALX5E001+ALZ0E002+ALZ0E003+AL1FE005+AL1FE010+AL1HE001, family=binomial())
+summary(log_m3)
+```
+
+Keep only significant predictors one last time
+```{r}
+# Logistic regression including only significant predictors
+log_m4<-glm(data=log_merged, 
+        value.change~ALVZE003+ALWVE003+ALWVE007+ALW0E006+ALW0E010+ALW0E011+ALW0E013+
+        ALX5E001+AL1FE005+AL1FE010+AL1HE001, family=binomial())
+summary(log_m4)
+```
+
+
+By comparing the AIC from the four logistic regression models, the first model should be used since it has a lower AIC. However, this is odd since that model contains insignificant predictors. 
+
+
+
+
+
+
+
+
+Lastly, create logistic model to see if someone will face a decrease of at least 50% of their initial value or not. 
+
+Create copy of merged dataset
+```{r}
+# Copy merged dataframe with only value.change variable, not pct_change
+log_50<-merged_val
+```
+
+
+Change value.change values to 0 if value is less than 0.50, 1 otherwise
+```{r}
+# Code value.change to 0 if the value is less than 0.50 and 1 if it's greater than 0,5
+val_change<-ifelse((log_50$appealed.value-log_50$final.value)/log_50$appealed.value>=0.5, 1, 0)
+log_50$value.change<-val_change
+```
+
+Fit logistic regression model using variables all predictors that aren't NA, value.change still response variable
+```{r}
+# Logistic regression fitting predictors that don't result in NA
+log_m_50<-glm(data=log_50, 
+          value.change~ALUCE001+ALUCE002+ALUCE003+ALUCE004+ALUCE005+ALUCE006+ALUCE007+
+          ALUCE009+ALUKE002+ALUKE003+ALUKE004+ALUKE005+ALUKE006+ALUKE007+ALUKE008+ALUKE010+           ALU9E001+ALU9E002+ALU9E003+ALU9E005+ALU9E008+ALVZE003+ALVZE005+ALVZE006+ALVZE008+           ALVZE009+ALVZE010+ALVZE011+ALVZE015+ALVZE016+ALWVE001+ALWVE002+ALWVE003+ALWVE004+           ALWVE005+ALWVE006+ALWVE007+ALW0E002+ALW0E003+ALW0E004+ALW0E005+ALW0E006+ALW0E007+           ALW0E008+ALW0E009+ALW0E010+ALW0E011+ALW0E012+ALW0E013+ALW0E014+ALW0E015+ALW0E016+           ALW1E001+ALX5E001+ALZJE001+ALZWE002+ALZWE003+ALZWE004+ALZWE005+ALZWE006+ALZWE007+           ALZWE009+ALZ0E001+ALZ0E002+ALZ0E003+AL1FE001+AL1FE002+AL1FE003+AL1FE004+AL1FE005+           AL1FE006+AL1FE007+AL1FE008+AL1FE009+AL1FE010+AL1FE011+AL1FE012+AL1FE013+AL1FE014+           AL1FE015+AL1FE016+AL1FE017+AL1FE018+AL1FE019+AL1FE020+AL1FE021+AL1FE022+AL1FE023+           AL1FE024+AL1FE025+AL1FE026+AL1HE001, family=binomial())
+summary(log_m_50)
+```
+
+Fit logistic regression on only those predictors that are significant, value.change still the response
+```{r}
+# Logistic regression only keeping significant predictors from previous model
+log_m2_50<-glm(data=log_merged, 
+           value.change~ALUCE009+ALUKE002+ALUKE006+ALVZE003+ALWVE004+ALW0E006+ALX5E001+
+           ALZWE002+ALZWE005+ALZ0E001+ALZ0E002+AL1FE001+AL1FE002+AL1FE004+AL1FE005+AL1FE010            +AL1FE011+AL1FE012+AL1FE013+AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+
+           AL1FE019+AL1FE020+AL1FE021+AL1FE022+AL1FE023+AL1FE024+AL1FE025+AL1HE001,
+           family=binomial())
+summary(log_m2_50)
+```
+
+Fit logistic regression on those predictors that are signficant 
+```{r}
+# Logistic regression only keeping significant predictors again
+log_m3_50<-glm(data=log_merged, 
+           value.change~ALUKE002+ALUKE006+ALVZE003+ALW0E006+ALX5E001+
+           ALZWE002+ALZWE005+ALZ0E001+ALZ0E002+AL1FE001+AL1FE002+AL1FE004+AL1FE005+AL1FE010            +AL1FE011+AL1FE012+AL1FE013+AL1FE014+AL1FE015+AL1FE016+AL1FE017+AL1FE018+
+           AL1FE019+AL1FE021+AL1FE023+AL1FE025+AL1HE001, family=binomial())
+summary(log_m3_50)
+```
+
+Based on the AIC values in all three logistic regressions, the first one should be used since it has the lowest AIC value. However, this is odd considering this model contains insignificant predictors. 

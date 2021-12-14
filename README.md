@@ -18,4 +18,5 @@ Libraries used:
   <li>pysal.viz.splot.esda = autocorrelation plots for Moran's I tests</li>
   <li>h3 = library created by Uber that geohashes the planet into equal area hex bins of varying resolution</li>
   <li>tolbler.util h3fy = an extension of the Tobler spatial package that enables ease of use for feeding in various shapefiles for easier hex binning</li>
+  <li>geocage = Python geocoder that utilizes and compares results from a number of geocoding sources. requires API key</li>
 </ul>
